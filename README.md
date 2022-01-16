@@ -37,6 +37,10 @@ The generated XML files was tested with BehaviorSpace in NetLogo 4.1.3 and
 See the file `INSTALL.md`
 
 
+## Installation
+See `INSTALL.md`
+
+
 ## Brief manual
 
 For a full list of options run: 
