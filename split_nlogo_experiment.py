@@ -20,7 +20,7 @@ containing a single value combination. Sometimes useful when setting up
 experiments to run com computer clusters.
 """
 
-__author__ = "Lukas Ahrenberg <lukas@ahrenberg.se>"
+__author__ = "Lukas Ahrenberg <lukas@ahrenberg.se>; David Chin"
 __license__ = "GPL3"
 __version__ = "0.3"
 
@@ -29,7 +29,7 @@ import sys
 import os.path
 import argparse
 from xml.dom import minidom
-from string import Formatter
+import string
 import csv
 
 
@@ -141,7 +141,7 @@ def createArrayScriptFile(script_fp,
 
     modelname = os.path.basename(nlogofile).split('.')[0]
 
-    strformatter = Formatter()
+    strformatter = string.Formatter()
     formatmap = {
         "experiment": experiment,
         "numexps": numexps,
@@ -159,35 +159,85 @@ def createArrayScriptFile(script_fp,
     script_fp.write(script_template.format(**formatmap))
 
 
-if __name__ == "__main__":
+def main():
     aparser = argparse.ArgumentParser(description="Split nlogo behavioral space experiments.")
-    aparser.add_argument("-n", "--nlogo_file", help="Netlogo .nlogo file with the original experiment")
+    aparser.add_argument("-n", "--nlogo_file",
+                         help="NetLogo .nlogo file with the original experiment")
 
-    ### Either specify one experiment, or all experiments, but not both
+    # Either specify one experiment, or all experiments, but not both
     group = aparser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-e", "--experiment", nargs="*", help="Name of one or more experiments in the nlogo file to expand. If none are given, --all_experiments must be set.")
-    group.add_argument("-a", "--all_experiments", action="store_true", help="If set, all experiments in the .nlogo file will be expanded.")
+    group.add_argument("-e", "--experiment", nargs="*",
+                       help="""Name of one or more experiments in the nlogo file
+                            to expand. If none are given,
+                            --all_experiments must be set.""")
+    group.add_argument("-a", "--all_experiments", action="store_true",
+                       help="""If set, all experiments in the .nlogo
+                            file will be expanded.""")
 
-    aparser.add_argument("--repetitions_per_run", type=int, default=1, help="Number of repetitions per generated experiment run. If the nlogo file is set to repeat an experiment N times, these will be split into N/n individual experiment runs (each repeating n times), where n is the argument given to this switch. Note that if n does not divide N this operation will result in a lower number of total repetitions.")
-    aparser.add_argument("--output_dir", default="./", help="Path to output directory if not current directory.")
-    aparser.add_argument("--output_prefix", default="", help="Generated files are named after the experiment, if set, the value given for this option will be prefixed to that name.")
+    aparser.add_argument("--repetitions_per_run", type=int, default=1,
+                         help="""Number of repetitions per generated experiment
+                              run. If the nlogo file is set to repeat an
+                              experiment N times, these will be split into N/n
+                              individual experiment runs (each repeating n
+                              times), where n is the argument given to this
+                              switch. Note that if n does not divide N this
+                              operation will result in a lower number of total
+                              repetitions.""")
+    aparser.add_argument("--output_dir", default="./",
+                         help="Path to output directory if not current directory.")
+    aparser.add_argument("--output_prefix", default="",
+                         help="""Generated files are named after the
+                              experiment, if set, the value given for this
+                              option will be prefixed to that name.""")
     # Scripting options.
-    aparser.add_argument("--create_script", dest="script_template_file", help="Tell the program to generate script files (for instance PBS files) alongside the xml setup files. A template file must be provided. See the external documentation for more details.")
-    aparser.add_argument("--script_output_dir", help="Path to output directory for script files. If not specified, the same directory as for the xml setup files is used.")
-    aparser.add_argument("--csv_output_dir", help="Path to output directory where the table data from the simulations will be saved. Use with script files to set output directory for executed scripts. If not specified, the same directory as for the xml setup files is used.")
-    aparser.add_argument("--create_run_table", action="store_true", help="Create a csv file containing a table of run numbers and corresponding parameter values. Will be named as the experiment but postfixed with '_run_table.csv'.")
-    aparser.add_argument("--no_path_translation", action="store_true", help="Turn off automatic path translation when generating scripts. Advanced use. By default all file and directory paths given are translated into absolute paths, and the existence of directories are tested. (This is because netlogo-headless.sh always run in the netlogo directory, which create problems with relative paths.) However automatic path translation may cause problems for users who, for instance, want to give paths that do yet exist, or split experiments on a different file system from where the simulations will run. In such cases enabling this option preserves the paths given to the program as they are and it is up to the user to make sure these will work.")
-    aparser.add_argument("-v", "--version", action="version", version=f"split_nlogo_experiment version {__version__}")
-    aparser.add_argument("-d", "--debug", action="store_true", default=False, help="Print debugging information.")
+    aparser.add_argument("--create_script", dest="script_template_file",
+                         help="""Tell the program to generate script files (for
+                              instance PBS files) alongside the xml setup
+                              files. A template file must be provided. See the
+                              external documentation for more details.""")
+    aparser.add_argument("--script_output_dir",
+                         help="""Path to output directory for script files. If
+                              not specified, the same directory as for the XML
+                              setup files is used.""")
+    aparser.add_argument("--csv_output_dir", help="""Path to output directory
+                         where the table data from the simulations will be
+                         saved. Use with script files to set output directory
+                         for executed scripts. If not specified, the same
+                         directory as for the xml setup files is used.""")
+    aparser.add_argument("--create_run_table", action="store_true",
+                         help="""Create a csv file containing a table of run
+                              numbers and corresponding parameter values. Will
+                              be named as the experiment but postfixed with
+                              '_run_table.csv'.""")
+    aparser.add_argument("--no_path_translation", action="store_true",
+                         help="""Turn off automatic path translation when
+                              generating scripts. Advanced use. By default all
+                              file and directory paths given are translated
+                              into absolute paths, and the existence of
+                              directories are tested. (This is because
+                              netlogo-headless.sh always run in the netlogo
+                              directory, which create problems with relative
+                              paths.) However automatic path translation may
+                              cause problems for users who, for instance, want
+                              to give paths that do yet exist, or split
+                              experiments on a different file system from where
+                              the simulations will run. In such cases enabling
+                              this option preserves the paths given to the
+                              program as they are and it is up to the user to
+                              make sure these will work.""")
+    aparser.add_argument("-v", "--version", action="version",
+                         version=f"split_nlogo_experiment v.{__version__}")
+    aparser.add_argument("-d", "--debug", action="store_true", default=False,
+                         help="Print debugging information.")
 
-    argument_ns = aparser.parse_args()
+    args = aparser.parse_args()
 
-    if argument_ns.debug:
-        print(f"DEBUG: argument_ns = {argument_ns}")
+    if args.debug:
+        print(f"DEBUG: args = {args}")
 
     experiments_xml = ""
     try:
-        with open(argument_ns.nlogo_file) as nlogof:
+        with open(args.nlogo_file) as nlogof:
             # An .nlogo file contain a lot of non-xml data
             # this is a hack to ignore those lines and
             # read the experiments data into an xml string
@@ -198,42 +248,42 @@ if __name__ == "__main__":
                 blist = elem.split("</experiments>")
                 experiments_xml += f"<experiments>{blist[0]}</experiments>\n"
     except IOError as ioe:
-        sys.stderr.write(ioe.strerror + f" '{ioe.filename}'\n")
+        print(ioe.strerror + f" '{ioe.filename}'", file=sys.stderr)
         sys.exit(ioe.errno)
 
     # Absolute paths.
     # We create absolute paths for some files and paths in case given relative.
 
-    if argument_ns.no_path_translation is False:
-        argument_ns.output_dir = os.path.abspath(argument_ns.output_dir)
+    if args.no_path_translation is False:
+        args.output_dir = os.path.abspath(args.output_dir)
 
-    if argument_ns.script_output_dir is None:
-        argument_ns.script_output_dir = argument_ns.output_dir
-    elif argument_ns.no_path_translation is False:
-        argument_ns.script_output_dir = os.path.abspath(argument_ns.script_output_dir)
+    if args.script_output_dir is None:
+        args.script_output_dir = args.output_dir
+    elif args.no_path_translation is False:
+        args.script_output_dir = os.path.abspath(args.script_output_dir)
 
-    if argument_ns.csv_output_dir is None:
-        argument_ns.csv_output_dir = argument_ns.output_dir
-    elif argument_ns.no_path_translation is False:
-        argument_ns.csv_output_dir = os.path.abspath(argument_ns.csv_output_dir)
+    if args.csv_output_dir is None:
+        args.csv_output_dir = args.output_dir
+    elif args.no_path_translation is False:
+        args.csv_output_dir = os.path.abspath(args.csv_output_dir)
 
     # This is the absolute path name of the nlogo model file.
-    if argument_ns.no_path_translation is False:
-        nlogo_file_abs = os.path.abspath(argument_ns.nlogo_file)
+    if args.no_path_translation is False:
+        nlogo_file_abs = os.path.abspath(args.nlogo_file)
     else:
-        nlogo_file_abs = argument_ns.nlogo_file
+        nlogo_file_abs = args.nlogo_file
 
     # Check if scripts should be generated and read the template file.
-    if argument_ns.script_template_file is not None:
-        script_extension = os.path.splitext(argument_ns.script_template_file)[1]
+    if args.script_template_file is not None:
+        script_extension = os.path.splitext(args.script_template_file)[1]
         try:
-            with open(argument_ns.script_template_file) as pbst:
+            with open(args.script_template_file) as pbst:
                 script_template_string = pbst.read()
         except IOError as ioe:
-            sys.stderr.write(ioe.strerror + f" '{ioe.filename}'\n")
+            print(ioe.strerror + f" '{ioe.filename}'", file=sys.stderr)
             sys.exit(ioe.errno)
 
-            sys.stdout.write(f"tst {argument_ns.repetitions_per_run}: ")
+            sys.stdout.write(f"tst {args.repetitions_per_run}: ")
 
     #
     # Start processing.
@@ -249,11 +299,11 @@ if __name__ == "__main__":
 
     for orig_experiment in original_dom.getElementsByTagName("experiment"):
         orig_exp_name = orig_experiment.getAttribute("name")
-        if argument_ns.all_experiments or (orig_exp_name in argument_ns.experiment):
+        if args.all_experiments or (orig_exp_name in args.experiment):
 
             experiment = orig_experiment.cloneNode(deep=True)
 
-            if argument_ns.debug:
+            if args.debug:
                 print(f"DEBUG: orig_exp_name = {orig_exp_name}")
                 print(f"DEBUG: experiment = {experiment}")
 
@@ -261,28 +311,38 @@ if __name__ == "__main__":
             value_tuples = []
             num_individual_runs = 1
 
-            # Number of repetieitons.
-            # In the experiment.
+            # Number of repetitions in the experiment.
             # Read original value first. Default is to have all internal.
             reps_in_experiment = int(experiment.getAttribute("repetitions"))
 
             # Repeats of the created experiment.
             reps_of_experiment = 1
 
-            # Check if we should split experiments. An unset switch or value <= 0 means no splitting.
-            if argument_ns.repetitions_per_run > 0:
+            # Check if we should split experiments.
+            # An unset switch or value <= 0 means no splitting.
+            if args.repetitions_per_run > 0:
                 original_reps = int(experiment.getAttribute("repetitions"))
 
-                if argument_ns.debug:
-                    print(f"DEBUG: argument_ns.repetitions_per_run = {argument_ns.repetitions_per_run}")
+                if args.debug:
+                    print(f"DEBUG: args.repetitions_per_run = {args.repetitions_per_run}")
                     print(f"DEBUG: original_reps = {original_reps}")
                     print("")
 
-                if original_reps >= argument_ns.repetitions_per_run:
-                    reps_in_experiment = argument_ns.repetitions_per_run
+                if original_reps >= args.repetitions_per_run:
+                    reps_in_experiment = args.repetitions_per_run
                     reps_of_experiment = original_reps // reps_in_experiment
                     if (original_reps % reps_in_experiment) != 0:
-                        sys.stderr.write(f"Warning: Number of repetitions per experiment does not divide the number of repetitions in the nlogo file. New number of repetitions is {(reps_in_experiment*reps_of_experiment)} ({reps_in_experiment} per experiment in {reps_of_experiment} unique script(s)). Original number of repetitions per experiment: {original_reps}.\n")
+                        print(("Warning: Number of repetitions per "
+                               "experiment does not divide the number of "
+                               "repetitions in the nlogo file. New number of "
+                               "repetitions is "
+                               f"{(reps_in_experiment*reps_of_experiment)} "
+                               f"({reps_in_experiment} "
+                               "per experiment in "
+                               f"{reps_of_experiment} "
+                               "unique script(s)). Original number of "
+                               "repetitions per experiment: {original_reps}."),
+                              file=sys.stderr)
 
             # Handle enumeratedValueSets
             for evs in experiment.getElementsByTagName("enumeratedValueSet"):
@@ -293,7 +353,8 @@ if __name__ == "__main__":
                 if len(values) > 1:
                     # A tuple is the name of the variable and
                     # A list of all the values.
-                    value_tuples.append((evs.getAttribute("variable"), [val.getAttribute("value") for val in values]))
+                    value_tuples.append((evs.getAttribute("variable"),
+                                         [val.getAttribute("value") for val in values]))
                     num_individual_runs *= len(value_tuples[-1][1])
 
                     # Remove the node.
@@ -352,11 +413,13 @@ if __name__ == "__main__":
                         # Always add the current value.
                         run_table[-1].append(evs_value)
 
-                    # Replace some special characters (including space) with chars that may cause problems in a file name.
-                    # This is NOT fail safe right now. Assuming some form of useful experiment naming practice.
-                    experiment_name = experiment_instance.getAttribute("name").replace(' ', '_').replace('/', '-').replace('\\','-')
-                    xml_filename = os.path.join(argument_ns.output_dir, 
-                                                argument_ns.output_prefix + experiment_name
+                    # Replace some special characters (including space) with
+                    # chars that may cause problems in a file name.
+                    # This is NOT fail safe right now. Assuming some form of
+                    # useful experiment naming practice.
+                    experiment_name = experiment_instance.getAttribute("name").replace(' ', '_').replace('/', '-').replace('\\', '-')
+                    xml_filename = os.path.join(args.output_dir,
+                                                args.output_prefix + experiment_name
                                                 + '_'
                                                 + str(enum).zfill(len(str(num_individual_runs)))
                                                 + '.xml')
@@ -364,7 +427,8 @@ if __name__ == "__main__":
                         with open(xml_filename, 'w') as xmlfile:
                             saveExperimentToXMLFile(experiment_instance, xmlfile)
                     except IOError as ioe:
-                        sys.stderr.write(ioe.strerror + f" '{ioe.filename}'\n")
+                        print(ioe.strerror + f" '{ioe.filename}'",
+                              file=sys.stderr)
                         sys.exit(ioe.errno)
 
                     enum += 1
@@ -372,9 +436,9 @@ if __name__ == "__main__":
                 processed_experiments[orig_exp_name] = (enum - 1)
 
             # Check if the run table should be saved.
-            if argument_ns.create_run_table:
-                run_table_file_name = os.path.join(argument_ns.output_dir,
-                                                   argument_ns.output_prefix
+            if args.create_run_table:
+                run_table_file_name = os.path.join(args.output_dir,
+                                                   args.output_prefix
                                                    + experiment_name
                                                    + "_run_table.csv")
                 try:
@@ -383,7 +447,7 @@ if __name__ == "__main__":
                         for row in run_table:
                             rt_csv_writer.writerow(row)
                 except IOError as ioe:
-                    sys.stderr.write(ioe.strerror + f" '{ioe.filename}'\n")
+                    print(ioe.strerror + f" '{ioe.filename}'", file=sys.stderr)
                     sys.exit(ioe.errno)
 
     # Should a script file be created?
@@ -392,17 +456,17 @@ if __name__ == "__main__":
     # Each job script needs:
     # * experiment
     # * number of repetitions of experiment
-    if argument_ns.debug:
+    if args.debug:
         print(f"DEBUG: No. of processed experiments = {len(processed_experiments)}")
 
     for experiment_name, numexps in processed_experiments.items():
-        if argument_ns.debug:
+        if args.debug:
             print(f"DEBUG: experiment_name = {experiment_name}, numexps = {numexps}")
-            print("")
+            print()
 
-        if argument_ns.script_template_file is not None:
-            script_file_name = os.path.join(argument_ns.script_output_dir,
-                                            argument_ns.output_prefix
+        if args.script_template_file is not None:
+            script_file_name = os.path.join(args.script_output_dir,
+                                            args.output_prefix
                                             + experiment_name
                                             + "_script"
                                             + script_extension)
@@ -415,13 +479,18 @@ if __name__ == "__main__":
                         experiment_name,
                         numexps,
                         script_template_string,
-                        csv_output_dir=argument_ns.csv_output_dir)
+                        csv_output_dir=args.csv_output_dir)
             except IOError as ioe:
-                sys.stderr.write(ioe.strerror + f" '{ioe.filename}'\n")
+                print(ioe.strerror + f" '{ioe.filename}'", file=sys.stderr)
                 sys.exit(ioe.errno)
 
     # Warn if some experiments could not be found in the file.
-    if argument_ns.experiment:
-        for ename in argument_ns.experiment:
+    if args.experiment:
+        for ename in args.experiment:
             if ename not in processed_experiments:
-                print(f"Warning - Experiment named '{ename}' not found in model file '{argument_ns.nlogo_file}'")
+                print((f"Warning - Experiment named '{ename}' "
+                       f"not found in model file '{args.nlogo_file}'"))
+
+
+if __name__ == "__main__":
+    main()
