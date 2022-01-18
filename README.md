@@ -1,8 +1,6 @@
 # split_nlogo_experiment
-
 Splits NetLogo BehaviorSpace experiments, creating one XML setup file per 
 possible variable value combination.
-
 
 Author: Lukas Ahrenberg <lukas@ahrenberg.se>
 
@@ -10,7 +8,6 @@ License: GNU GPL-3.0. See LICENSE file for details.
 
 
 ## About
-
 This script was written to ease the burden of running 
 [NetLogo](https://ccl.northwestern.edu/netlogo/) simulations on computing grids.
 It parses a `.nlogo` file, looking for the `<experiments>` XML setup, and then 
@@ -22,9 +19,7 @@ simultaneously on a computing cluster using `netlogo-headless.sh` with the
 In addition `split_nlogo_experiment` has basic templating functionality that 
 can be used to automatically generate a job array script.
 
-
 ## Requirements and testing
-
 `split_nlogo_experiment` requires [Python](https://www.python.org) and has been 
 tested with Python 2.7 and 3.6, other Python3 versions should work as well, and 
 perhaps also Python 2.6 (though this has not been tested).
@@ -33,33 +28,29 @@ The generated XML files was tested with BehaviorSpace in NetLogo 4.1.3 and
 5.0RC7.
 
 ## Installation
-
-See the file `INSTALL.md`
-
-
-## Installation
 See `INSTALL.md`
 
-
 ## Brief manual
-
 For a full list of options run: 
-
-    split_nlogo_experiment -h
-
+```
+split_nlogo_experiment -h
+```
 
 ### Basic usage
-
 To split an experiment called 'experiment' in the file model.nlogo use:
 
-    split_nlogo_experiment --nlogo_file model.nlogo --experiment experiment
+```
+split_nlogo_experiment --nlogo_file model.nlogo --experiment experiment
+```
 
 This will produce a set of files called `experiment_<XYZ>.xml` where `<XYZ>` is 
 a zero-padded number. Each XML file represents a unique variable value 
 combination as an experiment. These files can be used with the NetLogo switch 
 `--setup-file`, e.g. to run the first value combination:
 
-    netlogo-headless.sh --model model.nlogo --setup-file experiment_0.xml
+```
+netlogo-headless.sh --model model.nlogo --setup-file experiment_0.xml
+```
 
 The XML files are always given the name of the experiment plus a sequence 
 number. If you want to prefix the file name for some reason you can use the 
@@ -67,7 +58,9 @@ number. If you want to prefix the file name for some reason you can use the
 XML files output in some other directory than the current use the 
 `--output_dir` option. For instance:
 
-    split_nlogo_experiment --output_dir /tmp --output_prefix --nlogo_file my_model.nlogo --experiment experiment
+```
+split_nlogo_experiment --output_dir /tmp --output_prefix --nlogo_file my_model.nlogo --experiment experiment
+```
 
 will cause the XML files to be saved in the directory `/tmp` and be named 
 `experiment_<XYZ>.xml` where `<XYZ>` is, as before, a number from 1 up to N, N 
@@ -77,7 +70,6 @@ Note that all the output directory must exist and be writable. If not an error
 is produced and the program exits.
 
 ### How many XML files are generated?
-
 Short answer: as many as you have unique combinations of variable values in 
 your BehaviorSpace times the number of repetitions you decide to 'break out' 
 using the --repetitions_per_run switch. 
@@ -99,7 +91,6 @@ times each. Likewise using `--repetitions_per_run 5` would create 12 files,
 each repeating the run 5 times.
 
 ### Start script templating functionality
-
 Computing clusters usually have a queuing mechanism where some job script is 
 submitted in order to run a job. If the BehaviorSpace experiment results in a 
 large number of simulations, this can be a very tedious process if one needs an 
@@ -147,9 +138,9 @@ netlogo-headless.sh \
 
 Assume this file is called `template_slurm.sh`, then calling 
 `split_nlogo_experiment` as:
-
-    split_nlogo_experiment --create_script template_slurm.sh --nlogo_file model.nlogo --experiment experiment
-
+```
+split_nlogo_experiment --create_script template_slurm.sh --nlogo_file model.nlogo --experiment experiment
+```
 will, in addition to creating the `experiment_<XYZ>.xml` files also create 
 files called `experiment_script.sh` (file ending will always be the same as for 
 the template file). In these files the keys `{xxx}` will be replaced according 
@@ -166,9 +157,7 @@ calling `split_nlogo_experiment` use the `--no_path_translation` switch.
 
 
 ## Appendix
-
 ### The problem
-
 When constructing simulations it is often desirable to run them with a range of 
 different parameter values in order to investigate each parameter's impact on 
 the overall process. In NetLogo such runs are easily configured using the 
@@ -184,7 +173,6 @@ files from the BehaviorSpace editor.
 
 
 ### Technicalities
-
 `split_nlogo_experiment` searches the experiment XML description for 
 `enumeratedValueSet` tags with more than one value as well as `steppedValueSet` 
 tags. The XML of these nodes are parsed, and the values for the associated 
