@@ -1,35 +1,55 @@
-# split_nlogo_experiment installation instructions
+# split_nlogo_experiment Installation Instructions
 
-## Using setup.py
+This package is not currently available on [PyPI](https://pypi.org).
 
-**CAUTION** It is not recommended to use the `setup.py` file for installation.
+## Build and Install
+This package assumes use of Python 3. It has been tested with
+Python >= 3.6.
 
-The easiest way to install is to run the setup.py script as:
+### Prerequisites
+Install these packages with `pip`
+- build
 
-    python setup.py install
-
-This may require super user privileges (so you may have to put a `sudo` in 
-front, or run it as root). You can also install it in your own home directory 
-by using the `--user` switch:
-
-    python setup.py install --user
-
-The above will cause split_nlogo_experiment to be installed in your home 
-directory (on Un\*x/Linux systems in `~/.local/bin` by default). If you go for 
-this option you may need to edit your `$PATH` variable.
-
-Run `python setup.py --help` for many more options regarding the `setup.py` 
-script.
-
-
-## By hand
-
-Simply copy the file `split_nlogo_experiment.py` to a directory in your
-`PATH`. E.g. if you have `~/bin` in your `PATH`:
+### Build
+To build:
 ```
-$ chmod +x split_nlogo_experiment.py
-$ cp split_nlogo_experiment.py ~/bin/split_nlogo_experiment
+$ tar -xf split_nlogo_experiment-v0.XXX.tar.gz
+$ cd split_nlogo_experiment-v0.XXX
+$ python -m build
 ```
 
-N.B. we have dropped the `.py` extension: that keeps the following
-documentation consistent.
+### Install
+If the build was successful, i.e. there were no error messages, 
+a `wheel` (`.whl`) file will be produced in the `dist` 
+directory. Install that wheel:
+```
+$ cd dist
+$ pip install --user split_nlogo_experiment-0.XXX-py3-none-any.whl
+```
+where `XXX` should be replaced with the actual version number
+in the `.whl` file name.
+
+### Modify PATH if necessary
+`pip install --user` will install in a user-specific private
+directory. This location varies by platform.
+
+On macOS, it is usually:
+```
+    ~/Library/Python/3.X/bin
+```
+where `X` is replaced with the minor version of the Python 
+you have installed (whether Apple-provided, via Homebrew,
+via Anaconda, or something else).
+
+On Linux, it is usually:
+```
+    ~/.local/bin
+```
+
+In any case, you may need to modify your login file to add
+the appropritate directory to your `PATH` environment variable.
+That file depends on your shell.
+
+For macOS, which now defaults to ZSH, the file is `~/.zshrc`. 
+For Linux, it is typically Bash, and the file is `~/.bashrc`.
+
