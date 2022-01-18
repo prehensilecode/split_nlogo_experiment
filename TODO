@@ -1,3 +1,4 @@
+* Need to package Slurm script templates since PyPA does not support arbitrary data files.
 * DONE Have not properly dealt with all_experiments=True + repetitions_per_run:
 ** DONE Need to create separate job script for each experiment.
 ** DONE How to handle case where number of repetitions == 1: it's OK for #SBATCH --array=1-1
