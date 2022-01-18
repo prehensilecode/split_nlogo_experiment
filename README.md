@@ -6,7 +6,6 @@ Author: Lukas Ahrenberg <lukas@ahrenberg.se>
 
 License: GNU GPL-3.0. See LICENSE file for details.
 
-
 ## About
 This script was written to ease the burden of running 
 [NetLogo](https://ccl.northwestern.edu/netlogo/) simulations on computing grids.
@@ -38,7 +37,6 @@ split_nlogo_experiment -h
 
 ### Basic usage
 To split an experiment called 'experiment' in the file model.nlogo use:
-
 ```
 split_nlogo_experiment --nlogo_file model.nlogo --experiment experiment
 ```
@@ -47,7 +45,6 @@ This will produce a set of files called `experiment_<XYZ>.xml` where `<XYZ>` is
 a zero-padded number. Each XML file represents a unique variable value 
 combination as an experiment. These files can be used with the NetLogo switch 
 `--setup-file`, e.g. to run the first value combination:
-
 ```
 netlogo-headless.sh --model model.nlogo --setup-file experiment_0.xml
 ```
@@ -57,7 +54,6 @@ number. If you want to prefix the file name for some reason you can use the
 `--output_prefix` option when calling `split_nlogo_experiment`. If you want the 
 XML files output in some other directory than the current use the 
 `--output_dir` option. For instance:
-
 ```
 split_nlogo_experiment --output_dir /tmp --output_prefix --nlogo_file my_model.nlogo --experiment experiment
 ```
@@ -155,7 +151,6 @@ work around the script translates all paths to absolute paths. If you want to
 suppress this behavior and always use the file names and paths as given when 
 calling `split_nlogo_experiment` use the `--no_path_translation` switch.
 
-
 ## Appendix
 ### The problem
 When constructing simulations it is often desirable to run them with a range of 
@@ -170,7 +165,6 @@ be done by hand. Neither is there functionality to generate individual setup
 files from the BehaviorSpace editor.
 
 `split_nlogo_experiment` was written to do just that.
-
 
 ### Technicalities
 `split_nlogo_experiment` searches the experiment XML description for 
