@@ -112,10 +112,13 @@ are saved for each XML file. Allowed keys are:
 As an example consider constructing a Slurm script for each experiment. This 
 script will issue special Slurm commands creating log files, setting the job 
 name, and finally run `netlogo-headless.sh` with the right commands. To do this 
-create a template file looking like:
+create a template file named `template_slurm.sh` looking like:
 
 ```bash
 #!/bin/bash
+### template_slurm.sh
+### XXX adjust the field width %3a for the number of tasks in the job array:
+###     2 if you have tens, 3 if you have hundreds, etc.
 #SBATCH --job-name={experiment}
 #SBATCH --output=%x-%A_%2a.out
 #SBATCH --error=%x-%A_%2a.err
@@ -130,6 +133,14 @@ netlogo-headless.sh \
     --model {model} \
     --setup-file {experiment}_${my_task_id}.xml \
     --table {csvfpath}/{experiment}_${my_task_id}.csv
+
+### DEBUG
+### These will help debug the job script generation.
+# {model} - [model] - The value of the parameter nlogofile.
+# {experiment} - [experiment] - The value of the parameter experiment.
+# {modelname} - [modelname] - Model name.
+# {csvfpath} - [csvfpath] - The value of the parameter csv_output_dir.
+# {numexps} - [numexps] - Total number of experiments.
 ```
 
 Assume this file is called `template_slurm.sh`, then calling 
@@ -142,6 +153,44 @@ files called `experiment_script.sh` (file ending will always be the same as for
 the template file). In these files the keys `{xxx}` will be replaced according 
 to the list above. An annotated example template is included in this source 
 repository.
+
+Another example Slurm template, with more verbose output:
+```bash
+#!/bin/bash
+### template_slurm_b.sh
+### XXX adjust the field width %3a for the number of tasks in the job array:
+###     2 if you have tens, 3 if you have hundreds, etc.
+#SBATCH --job-name={experiment}
+#SBATCH --output=%x-%A_%3a.out
+#SBATCH --error=%x-%A_%3a.err
+#SBATCH --array=1-{numexps}
+#SBATCH --mem=40G
+
+# In this example system, NetLogo is provided by a modulefile
+module load netlogo/5.3.1
+
+ne={numexps}
+formatstr="%0${#ne}d"
+my_task_id=$( printf $formatstr $SLURM_ARRAY_TASK_ID )
+
+echo "Model: {modelname}"
+echo "Experiment: {experiment}_${my_task_id}"
+
+# Rather than relying on the existence of a netlogo-headless.sh
+# wrapper script, this runs NetLogo directly from the JAR file.
+java -cp ${NETLOGOHOME}/app/NetLogo.jar \
+    org.nlogo.headless.Main \
+    --model {model} \
+    --setup-file {experiment}_${my_task_id}.xml \
+    --table {csvfpath}/{experiment}_${my_task_id}.csv
+
+### DEBUG
+# {model} - [model] - The value of the parameter nlogofile.
+# {experiment} - [experiment] - The value of the parameter experiment.
+# {modelname} - [modelname] - Model name.
+# {csvfpath} - [csvfpath] - The value of the parameter csv_output_dir.
+# {numexps} - [numexps] - Total number of experiments.
+```
 
 `split_nlogo_experiment` looks up the absolute path to any file and directory 
 given and use this for the keys. The reason for doing so is that the 
