@@ -2,7 +2,7 @@
 Splits NetLogo BehaviorSpace experiments, creating one XML setup file per 
 possible variable value combination.
 
-Author: Lukas Ahrenberg <lukas@ahrenberg.se>
+Author: Lukas Ahrenberg <lukas@ahrenberg.se>; David Chin
 
 License: GNU GPL-3.0. See LICENSE file for details.
 

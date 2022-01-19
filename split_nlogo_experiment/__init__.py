@@ -15,7 +15,7 @@
 __author__ = "Lukas Ahrenberg"
 __author_email__ = "lukas@ahrenberg.se"
 __license__ = "GPLv3"
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 
 import sys
